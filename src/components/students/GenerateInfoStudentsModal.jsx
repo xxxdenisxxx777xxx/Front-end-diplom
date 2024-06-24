@@ -6,7 +6,7 @@ function GenerateInfoStudentsModal({ isOpen, onClose }) {
     const [data, setData] = useState([]);
 
     useEffect(() => {
-        axios.get(`http://localhost:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1`)
+        axios.get(`http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1`)
             .then(response => {
                 setData(response.data[0]);
                 console.log(response.data[0].login);

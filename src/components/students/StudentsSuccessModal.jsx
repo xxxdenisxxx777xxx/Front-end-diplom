@@ -1,96 +1,104 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import DropDisciplines from "../disciplines/DropDisciplines";
-import {
-    Card,
-    CardBody,
-    Typography,
-    Button,
-} from "@material-tailwind/react";
+import { Card, CardBody, Typography, Button } from "@material-tailwind/react";
 
-function StudentsSuccessModal({ isOpen, onClose, studentId }) {
-    const [homeworkGrades, setHomeworkGrades] = useState([]);
-    const [attendanceGrades, setAttendanceGrades] = useState([]);
-    const [selectedDisciplineId, setSelectedDisciplineId] = useState(null);
+function StudentsSuccessModal({ isOpen, onClose, studentId, onDataChange }) {
+    const [grades, setGrades] = useState([]);
     const [averageGrade, setAverageGrade] = useState(0);
+    const [subjects, setSubjects] = useState([]);
+    const [editableGrade, setEditableGrade] = useState(null);
 
     useEffect(() => {
-        fetchGrades(selectedDisciplineId, studentId);
-    }, [selectedDisciplineId, studentId]);
+        if (studentId) {
+            fetchGrades(studentId);
+        }
+        fetchSubjects();
+    }, [studentId]);
 
     useEffect(() => {
         calculateAverageGrade();
-    }, [homeworkGrades, attendanceGrades]);
+    }, [grades]);
 
-    const fetchGrades = (disciplineId, studentId) => {
-        if (disciplineId && studentId) {
-            axios.get(`http://localhost:5008/api/HomeWorks?disciplineId=${disciplineId}&studentId=${studentId}`)
-                .then(response => {
-                    setHomeworkGrades(response.data.items);
-                })
-                .catch(error => {
-                    console.error('Error fetching homework grades:', error);
-                });
-            axios.get(`http://localhost:5008/api/StudentAttendances?disciplineId=${disciplineId}&studentId=${studentId}`)
-                .then(response => {
-                    setAttendanceGrades(response.data.items);
-                })
-                .catch(error => {
-                    console.error('Error fetching attendance grades:', error);
-                });
-        } else {
-            setHomeworkGrades([]);
-            setAttendanceGrades([]);
+    const fetchGrades = async (studentId) => {
+        try {
+            const homeworkResponse = await axios.get("http://77.221.152.210:5008/api/HomeWorks");
+            const attendanceResponse = await axios.get("http://77.221.152.210:5008/api/StudentAttendances");
+
+            const combinedGrades = [...homeworkResponse.data.items, ...attendanceResponse.data.items];
+            const filteredGrades = combinedGrades.filter(grade => grade.studentId === studentId);
+
+            setGrades(filteredGrades);
+            onDataChange({ grades: filteredGrades, subjects });
+        } catch (error) {
+            console.error('Error fetching grades:', error);
+        }
+    };
+
+    const fetchSubjects = async () => {
+        try {
+            const response = await axios.get("http://77.221.152.210:5008/api/Lessons");
+            setSubjects(response.data.items);
+            onDataChange({ grades, subjects: response.data.items });
+        } catch (error) {
+            console.error('Error fetching subjects:', error);
         }
     };
 
     const calculateAverageGrade = () => {
-        const combinedGrades = homeworkGrades.concat(attendanceGrades);
-        if (combinedGrades.length === 0) {
+        if (grades.length === 0) {
             setAverageGrade(0);
             return;
         }
-        const sum = combinedGrades.reduce((acc, grade) => acc + grade.grade, 0);
-        setAverageGrade(sum / combinedGrades.length);
+        const sum = grades.reduce((acc, grade) => acc + grade.grade, 0);
+        setAverageGrade(sum / grades.length);
     };
 
-    const lessonId = "3fa85f64-5717-4562-b3fc-2c963f66afa6";
+    const getSubjectName = (lessonId) => {
+        const subject = subjects.find(sub => sub.id === lessonId);
+        return subject ? subject.subjectName : 'Неизвестный предмет';
+    };
 
-    const handleEditGrade = (gradeId, newGrade, type) => {
-        const url = type === 'homework'
-            ? `http://localhost:5008/api/HomeWorks/${gradeId}`
-            : `http://localhost:5008/api/StudentAttendances/${gradeId}`;
+    const handleGradeClick = (grade) => {
+        setEditableGrade(grade);
+    };
 
-        axios.put(url, { grade: newGrade, studentId: studentId, lessonId: lessonId })
-            .then(response => {
-                if (response.status === 200) {
-                    if (type === 'homework') {
-                        const updatedGrades = homeworkGrades.map(grade => {
-                            if (grade.id === gradeId) {
-                                return { ...grade, grade: newGrade };
-                            } else {
-                                return grade;
-                            }
-                        });
-                        setHomeworkGrades(updatedGrades);
-                    } else {
-                        const updatedGrades = attendanceGrades.map(grade => {
-                            if (grade.id === gradeId) {
-                                return { ...grade, grade: newGrade };
-                            } else {
-                                return grade;
-                            }
-                        });
-                        setAttendanceGrades(updatedGrades);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error updating grade:', error);
-            });
+    const handleGradeChange = (event) => {
+        setEditableGrade({ ...editableGrade, grade: Number(event.target.value) });
+    };
+
+    const handleGradeBlur = async () => {
+        const updatedGrade = editableGrade;
+        setEditableGrade(null);
+
+        try {
+            if (updatedGrade.type === 'homework') {
+                await axios.put(`http://77.221.152.210:5008/api/HomeWorks/${updatedGrade.id}`, updatedGrade);
+            } else {
+                await axios.put(`http://77.221.152.210:5008/api/StudentAttendances/${updatedGrade.id}`, updatedGrade);
+            }
+
+            const updatedGrades = grades.map(grade =>
+                grade.id === updatedGrade.id ? updatedGrade : grade
+            );
+            setGrades(updatedGrades);
+            onDataChange({ grades: updatedGrades, subjects });
+        } catch (error) {
+            console.error('Error updating grade:', error);
+        }
     };
 
     if (!isOpen) return null;
+
+    const TABLE_HEAD = ["Предмет", "Оценки"];
+
+    const groupedGrades = grades.reduce((acc, grade) => {
+        const subjectName = getSubjectName(grade.lessonId);
+        if (!acc[subjectName]) {
+            acc[subjectName] = [];
+        }
+        acc[subjectName].push(grade);
+        return acc;
+    }, {});
 
     return (
         <div className="fixed inset-0 z-50 flex items-center bg-gray-500 bg-opacity-50 justify-center overflow-x-hidden overflow-y-auto w-full">
@@ -98,66 +106,71 @@ function StudentsSuccessModal({ isOpen, onClose, studentId }) {
                 <Card className="my-6">
                     <CardBody>
                         <div className="flex flex-col gap-6">
-                            <DropDisciplines onChange={setSelectedDisciplineId} />
                             <Typography variant="h5" className="text-center">
                                 Оценка за домашние задания и работу на уроке
                             </Typography>
-                            <div className="space-y-4">
-                                <div>
-                                    <Typography variant="h6">
-                                        Домашние задания:
-                                    </Typography>
-                                    <ul className="list-disc list-inside">
-                                        {homeworkGrades.map((grade, index) => (
-                                            <li
-                                                key={index}
-                                                onClick={() => {
-                                                    const newGrade = prompt('Введите новую оценку:', grade.grade);
-                                                    const newAnswer = prompt('Введите новый ответ:', grade.comment || '');
-                                                    const date = prompt('Введите новый ответ:', grade.date || '');
-                                                    if (newGrade !== null && newGrade !== '' && newAnswer !== null) {
-                                                        handleEditGrade(grade.id, { grade: newGrade, comment: newAnswer }, 'homework');
-                                                    }
-                                                }}
-                                                className="cursor-pointer hover:bg-gray-200 p-1 rounded"
-                                            >
-                                                ДЗ: {grade.grade}, Коментарий: {grade.comment || 'Нет ответа'}, {grade.date}
-                                            </li>
+                            <Card className="h-full w-full overflow-scroll">
+                                <table className="w-full min-w-max table-auto text-left">
+                                    <thead>
+                                        <tr>
+                                            {TABLE_HEAD.map((head) => (
+                                                <th key={head} className="border-b border-blue-gray-100 bg-blue-gray-50 p-4">
+                                                    <Typography
+                                                        variant="small"
+                                                        color="blue-gray"
+                                                        className="font-normal leading-none opacity-70"
+                                                    >
+                                                        {head}
+                                                    </Typography>
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.keys(groupedGrades).map((subjectName, index) => (
+                                            <tr key={index} className="even:bg-blue-gray-50/50">
+                                                <td className="p-4">
+                                                    <Typography variant="small" color="blue-gray" className="font-normal">
+                                                        {subjectName}
+                                                    </Typography>
+                                                </td>
+                                                <td className="p-4">
+                                                    {groupedGrades[subjectName].map((grade, i) => (
+                                                        <div key={i} className="inline-block mr-4">
+                                                            {editableGrade && editableGrade.id === grade.id ? (
+                                                                <input
+                                                                    type="number"
+                                                                    value={editableGrade.grade}
+                                                                    onChange={handleGradeChange}
+                                                                    onBlur={handleGradeBlur}
+                                                                    autoFocus
+                                                                    className="border rounded p-1"
+                                                                />
+                                                            ) : (
+                                                                <Typography
+                                                                    variant="small"
+                                                                    color="blue-gray"
+                                                                    className="font-normal"
+                                                                    onClick={() => handleGradeClick(grade)}
+                                                                >
+                                                                    {grade.grade}
+                                                                </Typography>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </td>
+                                            </tr>
                                         ))}
-                                    </ul>
-                                </div>
-                                <div>
-                                    <Typography variant="h6">
-                                        Классная работа:
-                                    </Typography>
-                                    <ul className="list-disc list-inside">
-                                        {attendanceGrades.map((grade, index) => (
-                                            <li
-                                                key={index}
-                                                onClick={() => {
-                                                    const newGrade = prompt('Введите новую оценку:', grade.grade);
-                                                    if (newGrade !== null && newGrade !== '') {
-                                                        handleEditGrade(grade.id, newGrade, 'attendance');
-                                                    }
-                                                }}
-                                                className="cursor-pointer hover:bg-gray-200 p-1 rounded"
-                                            >
-                                                Классная работа: {grade.grade}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                                <Typography className="font-bold">
-                                    Средняя оценка: {averageGrade.toFixed(2)}
-                                </Typography>
-                            </div>
+                                    </tbody>
+                                </table>
+                            </Card>
+                            <Typography className="font-bold">
+                                Средняя оценка: {averageGrade.toFixed(2)}
+                            </Typography>
                         </div>
                     </CardBody>
                     <div className="flex items-center justify-between p-6 border-t border-solid border-blueGray-200 rounded-b">
-                        <Button
-                            className="bg-emerald-500"
-                            onClick={onClose}
-                        >
+                        <Button className="bg-emerald-500" onClick={onClose}>
                             Готово
                         </Button>
                     </div>

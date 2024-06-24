@@ -59,7 +59,7 @@ const TeachersTable = () => {
     const itemsPerPage = 10;
 
     useEffect(() => {
-        axios.get(`http://localhost:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66a200`)
+        axios.get(`http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa7`)
             .then(response => {
                 // Проверяем каждый элемент в полученных данных
                 const newData = response.data.items.map(item => {
@@ -155,11 +155,9 @@ const TeachersTable = () => {
                                     {item.email}
                                 </td>
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                    {/* Добавьте значение по умолчанию для периода или удалите этот столбец */}
                                     {item.phoneNumber}
                                 </td>
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                    {/* Добавьте значение по умолчанию для периода или удалите этот столбец */}
                                     {item.amount}
                                 </td>
                             </tr>

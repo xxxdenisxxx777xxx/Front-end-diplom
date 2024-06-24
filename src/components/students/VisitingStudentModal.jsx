@@ -4,25 +4,41 @@ import DropDisciplines from "../disciplines/DropDisciplines";
 
 function VisitingStudentModal({ attendanceData, studentsId, isOpen, onClose, selected }) {
     const [attendanceList, setAttendanceList] = useState([]);
+    const [lessons, setLessons] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (isOpen) {
-            axios.get('http://localhost:5008/api/StudentAttendances')
-                .then(response => {
-                    setAttendanceList(response.data.items);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.error('Error fetching attendance data:', error);
-                    setLoading(false);
-                });
+            fetchAttendanceData();
+            fetchLessonsData();
         }
     }, [isOpen]);
 
+    const fetchAttendanceData = () => {
+        axios.get('http://77.221.152.210:5008/api/StudentAttendances')
+            .then(response => {
+                setAttendanceList(response.data.items);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching attendance data:', error);
+                setLoading(false);
+            });
+    };
+
+    const fetchLessonsData = () => {
+        axios.get('http://77.221.152.210:5008/api/Lessons')
+            .then(response => {
+                setLessons(response.data.items);
+            })
+            .catch(error => {
+                console.error('Error fetching lessons data:', error);
+            });
+    };
+
     const handleTogglePresence = (attendance) => {
         const newIsPresent = !attendance.isPresent;
-        axios.put(`http://localhost:5008/api/StudentAttendances/${attendance.id}`, {
+        axios.put(`http://77.221.152.210:5008/api/StudentAttendances/${attendance.id}`, {
             ...attendance,
             isPresent: newIsPresent
         })
@@ -38,13 +54,25 @@ function VisitingStudentModal({ attendanceData, studentsId, isOpen, onClose, sel
             });
     };
 
+    const getRandomDate = () => {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+        return date.toLocaleDateString();
+    };
+
+    const getLessonName = (lessonId) => {
+        const lesson = lessons.find(lesson => lesson.id === lessonId);
+        return lesson ? lesson.subjectName : 'Неизвестный предмет';
+    };
+
     if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center bg-gray-500 bg-opacity-50 justify-center overflow-x-hidden overflow-y-auto w-full">
             <div className="max-w-4xl w-full p-6 flex justify-center bg-white rounded-lg my-6 shadow-lg">
                 <div className="justify-start w-full">
-                    <DropDisciplines />
                     <h3 className="text-xl mt-4 font-semibold mb-4">Посещение студента</h3>
                     {loading ? (
                         <p>Загрузка...</p>
@@ -53,8 +81,9 @@ function VisitingStudentModal({ attendanceData, studentsId, isOpen, onClose, sel
                             {attendanceList.map((attendance) => (
                                 <div key={attendance.id} className="flex items-center justify-between p-4 border-b border-gray-200">
                                     <div>
-                                        <p>JAVA programming</p>
+                                        <p>{getLessonName(attendance.lessonId)}</p>
                                         <p>Присутствие на паре: {attendance.isPresent ? 'Да' : 'Нет'}</p>
+                                        <p>Дата: {getRandomDate()}</p>
                                     </div>
                                     <button
                                         className={`px-4 py-2 rounded-md text-white ${attendance.isPresent ? 'bg-red-500' : 'bg-green-500'}`}

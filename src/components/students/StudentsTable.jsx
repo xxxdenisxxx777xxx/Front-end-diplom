@@ -61,7 +61,7 @@ const StudentsList = () => {
     const { id } = useParams();
 
     useEffect(() => {
-        axios.get(`http://localhost:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1`)
+        axios.get(`http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1`)
             .then(response => {
                 const newData = response.data.items.map(item => {
                     if (item.departmentId === "3fa85f64-5717-4562-b3fc-2c963f66afa1") {
@@ -71,7 +71,7 @@ const StudentsList = () => {
                     }
                     return item;
                 });
-                newData.sort((a, b) => (a.lastName + ' ' + a.firstName).localeCompare(b.lastName + ' ' + b.firstName));
+                newData.sort((a, b) => (a.student + ' ' + a.student).localeCompare(b.student + ' ' + b.student));
                 setData(newData);
                 console.log(newData);
             })
@@ -88,9 +88,9 @@ const StudentsList = () => {
         }
 
         return data.filter((item) =>
-            (item.firstName && item.firstName.toLowerCase().includes(globalFilter.toLowerCase())) ||
-            (item.lastName && item.lastName.toLowerCase().includes(globalFilter.toLowerCase())) ||
-            (item.email && item.email.toLowerCase().includes(globalFilter.toLowerCase()))
+            (item.student && item.student.toLowerCase().includes(globalFilter.toLowerCase())) ||
+            (item.student && item.student.toLowerCase().includes(globalFilter.toLowerCase())) ||
+            (item.tax_number && item.tax_number.toLowerCase().includes(globalFilter.toLowerCase()))
         );
     }, [data, globalFilter]);
 
@@ -143,17 +143,17 @@ const StudentsList = () => {
                             <th className="px-3 text-start text-xs font-light uppercase">Група</th>
                             <th className="px-3 text-start text-xs font-light uppercase">Email</th>
                             <th className="px-3 text-start text-xs font-light uppercase">Телефон</th>
-                            <th className="px-3 text-start text-xs font-light uppercase">Термін навчання</th>
+                            <th className="px-3 text-start text-xs font-light uppercase">Початок навчання</th>
                         </tr>
                     </thead>
                     <tbody onClick={isModalOpenInfoStudent}>
                         {currentPageData.map((item, i) => (
                             <tr key={i} onClick={() => openModalInfoStudent(item.id)} className="hover:bg-gray-100">
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                    {`${item.lastName} ${item.firstName}`}
+                                    {`${item.student}`}
                                 </td>
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                    {item.departmentEmail}
+                                    {item.group}
                                 </td>
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
                                     {item.email}
@@ -162,7 +162,7 @@ const StudentsList = () => {
                                     {item.phoneNumber}
                                 </td>
                                 <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                    2020-2024
+                                    {item.status_since}
                                 </td>
                             </tr>
                         ))}

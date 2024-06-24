@@ -9,7 +9,7 @@ export default function DropDisciplines({ onChange }) {
     const [selected, setSelected] = useState(null);
 
     useEffect(() => {
-        axios.get('http://localhost:5008/api/Disciplines')
+        axios.get('http://77.221.152.210:5008/api/Disciplines')
             .then(response => {
                 setDisciplines(response.data.items);
                 setSelected(response.data.items[1]);
@@ -27,7 +27,6 @@ export default function DropDisciplines({ onChange }) {
 
     return (
         <Listbox value={selected} onChange={(selected) => { setSelected(selected); }}>
-
             {({ open }) => (
                 <>
                     <div className='w-full'>

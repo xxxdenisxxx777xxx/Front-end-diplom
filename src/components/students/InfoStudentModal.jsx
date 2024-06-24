@@ -4,6 +4,7 @@ import StudentsSuccessModal from "./StudentsSuccessModal";
 import ReviewsStudentsModal from "./ReviewsStudentsModal";
 import VisitingStudentModal from "./VisitingStudentModal";
 import { FaEdit, FaSave } from "react-icons/fa";
+import EncryptionStudents from "../encryption/EncryptionStudents";
 
 function InfoStudentModal({ isOpen, onClose, studentData }) {
     const [data, setData] = useState({});
@@ -50,13 +51,19 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        setData((prev) => ({ ...prev, [name]: value }));
+        setData((prev) => ({
+            ...prev,
+            [name]: value,
+            // обновляем photoBase64, если изменено соответствующее поле
+            photoBase64: name === "photoBase64" ? value : prev.photoBase64,
+        }));
     };
 
     const handleSave = async (field) => {
         try {
-            const response = await axios.put(`http://localhost:5008/api/Users/${data.id}`, {
-                ...data
+            const response = await axios.put(`http://77.221.152.210:5008/api/Users/${data.id}`, {
+                ...data,
+                // можно обновить photoBase64 здесь, если необходимо
             });
             if (response.status === 200) {
                 console.log("Данные успешно обновлены");
@@ -69,7 +76,7 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
 
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`http://localhost:5008/api/Users/${data.id}`);
+            const response = await axios.delete(`http://77.221.152.210:5008/api/Users/${data.id}`);
             if (response.status === 200) {
                 console.log("Студент успешно удален");
                 onClose();
@@ -90,60 +97,40 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
                         <div className="flex flex-col justify-between text-start p-4 leading-normal">
                             <div className="mb-2 flex items-center">
                                 <h5 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                                    {isEditing.firstName ? (
+                                    {isEditing.student ? (
                                         <input
                                             type="text"
-                                            name="firstName"
-                                            value={data.firstName}
+                                            name="student"
+                                            value={data.student}
                                             onChange={handleInputChange}
                                             className="border rounded-md p-1"
                                         />
                                     ) : (
-                                        data.firstName
+                                        data.student
                                     )}{" "}
-                                    {isEditing.lastName ? (
-                                        <input
-                                            type="text"
-                                            name="lastName"
-                                            value={data.lastName}
-                                            onChange={handleInputChange}
-                                            className="border rounded-md p-1"
-                                        />
-                                    ) : (
-                                        data.lastName
-                                    )}
                                 </h5>
-                                {isEditing.firstName || isEditing.lastName ? (
-                                    <button onClick={() => handleSave("firstName")}>
-                                        <FaSave className="ml-2 text-inherit" />
-                                    </button>
-                                ) : (
-                                    <button onClick={() => handleEditClick("firstName")}>
-                                        <FaEdit className="ml-2 text-inherit" />
-                                    </button>
-                                )}
                             </div>
                             <div className="mb-3 flex items-center">
                                 <p className="font-normal text-gray-700 dark:text-gray-400">
-                                    Группа: {isEditing.departmentEmail ? (
+                                    Группа: {isEditing.group ? (
                                         <input
                                             type="text"
-                                            name="departmentEmail"
-                                            value={data.departmentEmail}
+                                            name="group"
+                                            value={data.group}
                                             onChange={handleInputChange}
                                             className="border rounded-md p-1"
                                         />
                                     ) : (
-                                        data.departmentEmail
+                                        data.group
                                     )}
                                 </p>
-                                {isEditing.departmentEmail ? (
-                                    <button onClick={() => handleSave("departmentEmail")}>
-                                        <FaSave className="ml-2 text-inherit" />
+                                {isEditing.group ? (
+                                    <button onClick={() => handleSave("group")}>
+
                                     </button>
                                 ) : (
-                                    <button onClick={() => handleEditClick("departmentEmail")}>
-                                        <FaEdit className="ml-2 text-inherit" />
+                                    <button onClick={() => handleEditClick("group")}>
+
                                     </button>
                                 )}
                             </div>
@@ -222,6 +209,8 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
                         >
                             Видалити студента
                         </button>
+                        <EncryptionStudents studentId={data.id} />
+
                         <button
                             className="bg-emerald-500 text-white active:bg-emerald-600 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                             type="button"

@@ -11,7 +11,7 @@ function GroupsCreateModal({ isOpen, onClose, groupName }) {
 
     const handleSubmit = async () => {
         try {
-            const response = await fetch('http://localhost:5008/api/StudentsGroups', {
+            const response = await fetch('http://77.221.152.210:5008/api/StudentsGroups', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

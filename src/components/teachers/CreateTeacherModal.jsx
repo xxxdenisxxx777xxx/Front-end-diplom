@@ -65,7 +65,7 @@ function CreateTeacherModal({ isOpen, onClose }) {
     const handleSubmit = async () => {
         try {
             const { firstName, lastName, departmentEmail, phoneNumber, email } = teacherData;
-            const departmentId = '3fa85f64-5717-4562-b3fc-2c963f66a200';  // Если departmentId всегда одинаковый, используйте его. Иначе, получите его из других данных
+            const departmentId = '3fa85f64-5717-4562-b3fc-2c963f66afa7';  // Если departmentId всегда одинаковый, используйте его. Иначе, получите его из других данных
             const { userName, password, unHiddenPassword } = generateCredentials(`${firstName} ${lastName}`);
 
             let photoBase64 = '';
@@ -90,7 +90,7 @@ function CreateTeacherModal({ isOpen, onClose }) {
     const sendData = async (firstName, lastName, departmentEmail, phoneNumber, email, departmentId, userName, password, unHiddenPassword, photoBase64) => {
         const dataToSend = { firstName, lastName, departmentEmail, departmentId, phoneNumber, userName, password, email, unHiddenPassword, photo: photoBase64 };
 
-        const response = await fetch('http://localhost:5008/api/Users', {
+        const response = await fetch('http://77.221.152.210:5008/api/Users', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

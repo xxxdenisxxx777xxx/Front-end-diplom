@@ -17,7 +17,7 @@ export default function ScheduleComponents() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch("http://localhost:5008/api/Disciplines");
+                const response = await fetch("http://77.221.152.210:5008/api/Disciplines");
                 const data = await response.json();
                 setScheduleData(data);
             } catch (error) {
@@ -28,7 +28,6 @@ export default function ScheduleComponents() {
         fetchData();
     }, []);
 
-    // Определите selectedDateDisciplines вне функции renderScheduleInfo
     let selectedDateDisciplines = [];
     if (scheduleData) {
         selectedDateDisciplines = scheduleData.items.filter(item =>
@@ -36,12 +35,9 @@ export default function ScheduleComponents() {
         );
     }
 
-    // Функция для отображения информации о дисциплинах на выбранную дату
     const renderScheduleInfo = () => {
-        // Если нет данных о рассписании, возвращаем null
         if (!scheduleData) return null;
 
-        // Если нет дисциплин на выбранную дату, показываем сообщение
         if (selectedDateDisciplines.length === 0) {
             return (
                 <div className="w-full h-96 p-10 ">
@@ -145,7 +141,6 @@ export default function ScheduleComponents() {
                             <p>{discipline.name}</p>
                             <p>{discipline.fieldOfStudy}</p>
                             <p>{discipline.description}</p>
-                            {/* Вывод других данных о дисциплине */}
                         </li>
 
                     ))}</p>

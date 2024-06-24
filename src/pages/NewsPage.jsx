@@ -10,7 +10,7 @@ function NewsPage({ id }) {
     useEffect(() => {
         async function fetchNews() {
             try {
-                const response = await fetch(`http://localhost:5008/api/News`);
+                const response = await fetch(`http://77.221.152.210:5008/api/News`);
                 const data = await response.json();
                 setNews(data.items);
             } catch (error) {
@@ -23,7 +23,7 @@ function NewsPage({ id }) {
 
     const deleteNews = async (newsId) => {
         try {
-            await fetch(`http://localhost:5008/api/News/${newsId}`, {
+            await fetch(`http://77.221.152.210:5008/api/News/${newsId}`, {
                 method: 'DELETE',
             });
             setNews(news.filter(item => item.id !== newsId));
@@ -35,7 +35,7 @@ function NewsPage({ id }) {
     const addNews = async () => {
         try {
             console.log(formData)
-            const response = await fetch(`http://localhost:5008/api/News`, {
+            const response = await fetch(`http://77.221.152.210:5008/api/News`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

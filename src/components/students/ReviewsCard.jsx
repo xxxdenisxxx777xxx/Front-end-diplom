@@ -15,7 +15,7 @@ export function ReviewsCard({ studentIdReview }) {
         const fetchReviews = async () => {
             try {
                 if (studentIdReview) {
-                    const response = await axios.get(`http://localhost:5008/api/Reviews/ByStudent/${studentIdReview}`);
+                    const response = await axios.get(`http://77.221.152.210:5008/api/Reviews/ByStudent/${studentIdReview}`);
                     setReviews(response.data);
                     console.log(response.data);
                 }

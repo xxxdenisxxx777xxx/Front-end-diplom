@@ -9,7 +9,7 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
 
     useEffect(() => {
         if (isOpen) {
-            axios.get('http://localhost:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1')
+            axios.get('http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa1')
                 .then(response => {
                     setStudents(response.data.items);
                 })
@@ -21,8 +21,8 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
 
     const filteredStudents = useMemo(() => {
         return students.filter((student) =>
-            student.firstName.toLowerCase().includes(globalFilter.toLowerCase()) ||
-            student.lastName.toLowerCase().includes(globalFilter.toLowerCase()) ||
+            student.student.toLowerCase().includes(globalFilter.toLowerCase()) ||
+            student.student.toLowerCase().includes(globalFilter.toLowerCase()) ||
             student.email.toLowerCase().includes(globalFilter.toLowerCase())
         );
     }, [students, globalFilter]);
@@ -39,10 +39,10 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
 
     const updateStudentDepartmentEmail = async (student) => {
         console.log(groupName)
-        const updatedStudent = { ...student, departmentEmail: groupName };
+        const updatedStudent = { ...student, group: groupName };
 
         try {
-            await axios.put(`http://localhost:5008/api/Users`, updatedStudent, {
+            await axios.put(`http://77.221.152.210:5008/api/Users`, updatedStudent, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
@@ -83,7 +83,7 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
                                     className={`p-2 cursor-pointer ${selectedStudents.includes(student) ? 'bg-blue-100' : 'bg-white'}`}
                                     onClick={() => handleStudentSelection(student)}
                                 >
-                                    {student.lastName} {student.firstName} ({student.email})
+                                    {student.student} ({student.email})
                                 </div>
                             ))}
                         </div>

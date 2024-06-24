@@ -14,6 +14,7 @@ import ExamsPage from "../pages/ExamsPage";
 import SchedulePage2 from "../pages/SchedulePage2";
 import Encryption from "../components/encryption/Encryption";
 import ScheduleExamsPage from "../pages/ScheduleExamsPage";
+import EncryptionStudents from "../components/encryption/EncryptionStudents";
 
 
 export default function AppRouter() {
@@ -30,7 +31,7 @@ export default function AppRouter() {
             <Route path="/statements" element={<StatementsPage />} />
             <Route path="/exams" element={<ExamsPage />} />
             <Route path="/schedule2" element={<SchedulePage2 />} />
-            <Route path="/encryption" element={<Encryption />} />
+            <Route path="/encryption" element={<EncryptionStudents />} />
             <Route path="/planningExams" element={<ScheduleExamsPage />} />
             <Route path="/itstep/university/users/admin" element={<AdminPanelStep />} />
         </Routes>

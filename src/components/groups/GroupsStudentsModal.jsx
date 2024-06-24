@@ -59,7 +59,7 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
     const itemsPerPage = 7;
 
     useEffect(() => {
-        axios.get(`http://localhost:5008/api/StudentsGroups/${groupId}`)
+        axios.get(`http://77.221.152.210:5008/api/StudentsGroups/${groupId}`)
             .then(response => {
                 setData(response.data.item.students);
                 console.log(response.data.item.students);
@@ -75,8 +75,8 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
         }
 
         return data.filter((item) =>
-            (item.firstName && item.firstName.toLowerCase().includes(globalFilter.toLowerCase())) ||
-            (item.lastName && item.lastName.toLowerCase().includes(globalFilter.toLowerCase())) ||
+            (item.student && item.student.toLowerCase().includes(globalFilter.toLowerCase())) ||
+            (item.student && item.student.toLowerCase().includes(globalFilter.toLowerCase())) ||
             (item.email && item.email.toLowerCase().includes(globalFilter.toLowerCase()))
         );
     }, [data, globalFilter]);
@@ -90,7 +90,7 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
 
     const handleDeleteStudent = async (studentId) => {
         try {
-            await axios.delete(`http://localhost:5008/api/Users/${studentId}`);
+            await axios.delete(`http://77.221.152.210:5008/api/Users/${studentId}`);
             setData((prevData) => prevData.filter(student => student.id !== studentId));
         } catch (error) {
             console.error('Error deleting student:', error);
@@ -101,7 +101,7 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
     const handleDeleteGroup = async () => {
         try {
             // Удалить всех студентов из группы
-            await fetch(`http://localhost:5008/api/AspNetUsers/deleteByGroup/${groupId}`, {
+            await fetch(`http://77.221.152.210:5008/api/AspNetUsers/deleteByGroup/${groupId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
             });
 
             // Удалить саму группу
-            const response = await fetch(`http://localhost:5008/api/StudentsGroups/${groupId}`, {
+            const response = await fetch(`http://77.221.152.210:5008/api/StudentsGroups/${groupId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -133,12 +133,12 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
 
     const handleAddStudents = async (selectedStudents) => {
         try {
-            await axios.post(`http://localhost:5008/api/StudentsGroups/addStudents`, {
+            await axios.post(`http://77.221.152.210:5008/api/StudentsGroups/addStudents`, {
                 groupId,
                 studentIds: selectedStudents.map(student => student.id),
             });
             // Обновляем список студентов
-            const response = await axios.get(`http://localhost:5008/api/StudentsGroups/${groupId}`);
+            const response = await axios.get(`http://77.221.152.210:5008/api/StudentsGroups/${groupId}`);
             setData(response.data.item.students);
         } catch (error) {
             console.error('Error adding students:', error);
@@ -175,10 +175,10 @@ function GroupsStudentsModal({ isOpen, onClose, groupId }) {
                                     {currentPageData.map((item, i) => (
                                         <tr key={i} className="hover:bg-gray-100">
                                             <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                                {`${item.firstName} ${item.lastName}`}
+                                                {`${item.student}`}
                                             </td>
                                             <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
-                                                {item.departmentEmail}
+                                                {item.group}
                                             </td>
                                             <td className="p-3 text-sm font-normal text-gray-700 first:rounded-l-lg last:rounded-r-lg">
                                                 {item.email}

@@ -2,7 +2,6 @@ import { Fragment, useState, useEffect } from 'react';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid';
 
-// Function to conditionally apply CSS classes
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ');
 }
@@ -12,7 +11,7 @@ export default function DropGroups() {
     const [selected, setSelected] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost:5008/api/StudentsGroups')
+        fetch('http://77.221.152.210:5008/api/StudentsGroups')
             .then(response => response.json())
             .then(data => {
                 setGroups(data.items);

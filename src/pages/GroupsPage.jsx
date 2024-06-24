@@ -44,7 +44,7 @@ export default function GroupsPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get(`http://localhost:5008/api/StudentsGroups`);
+                const response = await axios.get(`http://77.221.152.210:5008/api/StudentsGroups`);
                 if (Array.isArray(response.data.items)) {
                     const groupsData = response.data.items.map(item => ({ id: item.id, name: item.name }));
                     setGroups(groupsData);

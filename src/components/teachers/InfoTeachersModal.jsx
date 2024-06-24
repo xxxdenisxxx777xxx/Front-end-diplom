@@ -15,7 +15,7 @@ function InfoTeachersModal({ isOpen, onClose, teacherData }) {
 
     const handleDeleteTeacher = async () => {
         try {
-            const response = await axios.delete(`http://localhost:5008/api/Users/${data.id}`);
+            const response = await axios.delete(`http://77.221.152.210:5008/api/Users/${data.id}`);
             if (response.status === 200) {
                 console.log("Студент успешно удален");
                 onClose();
@@ -27,7 +27,7 @@ function InfoTeachersModal({ isOpen, onClose, teacherData }) {
 
     const handleDownloadExcel = async () => {
         try {
-            const response = await axios.get('http://localhost:5008/api/Schedules');
+            const response = await axios.get('http://77.221.152.210:5008/api/Schedules');
             console.log(response.data.items[0].file)
             // Раскодирование base64 в бинарные данные
             const decodedData = atob(response.data.items[0].file);
