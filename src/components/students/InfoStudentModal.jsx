@@ -5,6 +5,7 @@ import ReviewsStudentsModal from "./ReviewsStudentsModal";
 import VisitingStudentModal from "./VisitingStudentModal";
 import { FaEdit, FaSave } from "react-icons/fa";
 import EncryptionStudents from "../encryption/EncryptionStudents";
+import StatementsFile from "./StatementsFile";
 
 function InfoStudentModal({ isOpen, onClose, studentData }) {
     const [data, setData] = useState({});
@@ -223,6 +224,7 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
             </div>
             <StudentsSuccessModal isOpen={isOpenStudentSuccess} onClose={closeModal} studentId={studentId} />
             <ReviewsStudentsModal isOpen={isOpenStudentReviews} onClose={closeModalReviews} studentId={studentId} />
+            <StatementsFile studentId={studentId} />
             <VisitingStudentModal isOpen={isOpenStudentVisiting} onClose={closeModalVisiting} studentId={studentId} />
         </div>
     );

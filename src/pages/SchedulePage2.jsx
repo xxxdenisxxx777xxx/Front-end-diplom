@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DropTeachers from '../components/schedules/DropTeachers';
 
 const SchedulePage2 = () => {
     const initialSchedule = [
@@ -184,6 +185,9 @@ const SchedulePage2 = () => {
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                     <div className="bg-white p-4 w-96 rounded shadow-lg">
                         <h2 className="text-xl mb-4">Додання / Зміна розкладу</h2>
+                        <div className='pb-5'>
+                            <DropTeachers />
+                        </div>
                         <textarea
                             className="w-full h-32 p-2 border border-gray-300"
                             value={editingCell.value}
