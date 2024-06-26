@@ -55,7 +55,7 @@ const TeachersTable = () => {
     const [data, setData] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpenInfoTeacher, setIsModalOpenInfoTeacher] = useState(false);
-    const [selectedTeacherId, setSelectedTeacherId] = useState(null);
+    const [selectedTeacher, setSelectedTeacher] = useState(null);
     const itemsPerPage = 10;
 
     useEffect(() => {
@@ -63,7 +63,7 @@ const TeachersTable = () => {
             .then(response => {
                 // Проверяем каждый элемент в полученных данных
                 const newData = response.data.items.map(item => {
-                    // Если departmentId равен "3fa85f64-5717-4562-b3fc-2c963f66afa1", изменяем его на "КН20-1"
+                    // Если departmentId равен "3fa85f64-5717-4562-b3fc-2c963f66a200", изменяем его на "NodeJS"
                     if (item.departmentId === "3fa85f64-5717-4562-b3fc-2c963f66a200") {
                         item.departmentId = "NodeJS";
                     } else if (item.departmentId === "3fa85f64-5717-4562-b3fc-2c963f66a202") {
@@ -102,6 +102,7 @@ const TeachersTable = () => {
         setGroups([...students, newStudent]);
         closeModal();
     };
+
     const openModal = () => {
         setIsModalOpen(true);
     };
@@ -110,13 +111,12 @@ const TeachersTable = () => {
         setIsModalOpen(false);
     };
 
-
     const openModalInfoTeacher = (id) => {
-        const selectedTeacher = filteredData.find(student => student.id === id);
-        setSelectedTeacherId(selectedTeacher);
-        setIsModalOpenInfoTeacher(true);
-    };
+        const selectedTeacher = filteredData.find(teacher => teacher.id === id);
+        setSelectedTeacher(selectedTeacher);
+        setIsModalOpenInfoTeacher(true)
 
+    };
 
     const closeModalInfoTeacher = () => {
         setIsModalOpenInfoTeacher(false);
@@ -138,8 +138,8 @@ const TeachersTable = () => {
                         <tr>
                             <th className="px-3 text-start text-xs font-light uppercase">Прізвище та Ім'я</th>
                             <th className="px-3 text-start text-xs font-light uppercase">Предмет</th>
+                            <th className="px-3 text-start text-xs font-light uppercase">Email</th>
                             <th className="px-3 text-start text-xs font-light uppercase">Номер</th>
-                            <th className="px-3 text-start text-xs font-light uppercase">Группи</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -192,8 +192,7 @@ const TeachersTable = () => {
                         <button
                             onClick={() => changePage(pageCount - 1)}
                             disabled={currentPage === pageCount - 1}
-                            className={`px-3 py-1 rounded-lg ${currentPage === pageCount - 1 ? "text-gray-300" : "text-sky-700 hover:bg-sky-700 hover:text-white"
-                                }`}
+                            className={`px-3 py-1 rounded-lg ${currentPage === pageCount - 1 ? "text-gray-300" : "text-sky-700 hover:bg-sky-700 hover:text-white"}`}
                         >
                             <FaChevronRight className="mt-1" />
                         </button>
@@ -201,10 +200,11 @@ const TeachersTable = () => {
                 </ul>
             </div>
             <CreateTeacherModal isOpen={isModalOpen} onClose={closeModal} onSubmit={handleCreateStudent} />
-            <InfoTeachersModal isOpen={isModalOpenInfoTeacher} onClose={closeModalInfoTeacher} teacherData={selectedTeacherId} />
+            <InfoTeachersModal isOpen={isModalOpenInfoTeacher} onClose={closeModalInfoTeacher} teacherData={selectedTeacher} />
         </div>
-
     );
 };
 
 export default TeachersTable;
+
+
