@@ -50,17 +50,21 @@ function StatementsFile({ studentId, onDataChange }) {
                 const row = 9 + index;
                 worksheet[`A${row}`] = { v: `${student.student}` };
 
-                const { homeworkGrades, attendanceGrades } = await fetchGradesForStudent(student.id);
+                if (student.id === studentId) {
+                    const { homeworkGrades, attendanceGrades } = await fetchGradesForStudent(student.id);
 
-                homeworkGrades.forEach((grade, idx) => {
-                    const cell = String.fromCharCode(69 + idx) + row; // 'E' = 69 in ASCII
-                    worksheet[cell] = { v: grade.grade };
-                });
+                    // Записываем оценки по классной работе горизонтально начиная с AE
+                    homeworkGrades.forEach((grade, idx) => {
+                        const cell = String.fromCharCode(65 + 30 + idx) + row; // 'AE' = 65 (A) + 4 (E) + 26 (Здвиг на 30 для AE)
+                        worksheet[cell] = { v: grade.grade };
+                    });
 
-                attendanceGrades.forEach((grade, idx) => {
-                    const cell = `AE${row + idx}`;
-                    worksheet[cell] = { v: grade.grade };
-                });
+                    // Записываем оценки за посещаемость горизонтально, начиная с 'AE'
+                    attendanceGrades.forEach((grade, idx) => {
+                        const cell = String.fromCharCode(65 + 30 + idx + homeworkGrades.length) + row; // Смещение для посещаемости
+                        worksheet[cell] = { v: grade.grade };
+                    });
+                }
             }
 
             const updatedData = XLSX.write(workbook, { bookType: "xlsx", type: "array" });

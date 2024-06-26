@@ -224,7 +224,7 @@ function InfoStudentModal({ isOpen, onClose, studentData }) {
             </div>
             <StudentsSuccessModal isOpen={isOpenStudentSuccess} onClose={closeModal} studentId={studentId} />
             <ReviewsStudentsModal isOpen={isOpenStudentReviews} onClose={closeModalReviews} studentId={studentId} />
-            <StatementsFile studentId={studentId} />
+            {/* <StatementsFile studentId={studentId} /> */}
             <VisitingStudentModal isOpen={isOpenStudentVisiting} onClose={closeModalVisiting} studentId={studentId} />
         </div>
     );

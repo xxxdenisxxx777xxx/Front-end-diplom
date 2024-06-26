@@ -29,7 +29,7 @@ function Login({ children }) {
 
         console.log("im here")
         try {
-            const response = await axios.post('https://77.221.152.210:5008/api/Identity/Login', { userName: username, password: password }, { headers: { 'Content-Type': 'application/json' } });
+            const response = await axios.post('http://77.221.152.210:5008/api/Identity/Login', { userName: username, password: password }, { headers: { 'Content-Type': 'application/json' } });
             if (response.status === 200) {
                 localStorage.setItem('auth', JSON.stringify(response.data));
                 setIsAuth(true);
