@@ -30,7 +30,10 @@ function base64ToArrayBuffer(base64) {
 function EncryptionStudents({ studentId }) {
     const [student, setStudent] = useState("");
     const [dateBirthday, setDateBirthday] = useState("");
+    const [citizenship, setCitizenship] = useState("");
     const [photoBase64, setPhotoBase64] = useState("");
+    const [undef, setUndef] = useState("Не виявлено");
+    const [fo_id, setFo_id] = useState("");
     const [doc, setDoc] = useState(null);
 
     useEffect(() => {
@@ -41,6 +44,9 @@ function EncryptionStudents({ studentId }) {
                 if (item) {
                     setStudent(item.student);
                     setDateBirthday(item.birth_date);
+                    setCitizenship(item.citizenship);
+                    setUndef("Не виявлено");
+                    setFo_id(item.fo_id);
                     const photoBase64 = item.photoBase64.split(',')[0];
 
                     if (!photoBase64 || photoBase64 === "undefined") {
@@ -97,10 +103,22 @@ function EncryptionStudents({ studentId }) {
     const handleFileDownload = () => {
         if (doc) {
             try {
+                console.log("Rendering document with data:", {
+                    student,
+                    date_birthday: dateBirthday,
+                    photo: `data:image/jpeg;base64,${photoBase64}`,
+                    citizenship,
+                    undef,
+                    fo_id
+                });
+
                 doc.setData({
                     student,
                     date_birthday: dateBirthday,
-                    photo: `data:image/jpeg;base64,${photoBase64}`
+                    photo: `data:image/jpeg;base64,${photoBase64}`,
+                    citizenship,
+                    undef,
+                    fo_id
                 });
 
                 doc.render();

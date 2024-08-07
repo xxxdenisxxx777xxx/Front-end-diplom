@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName }) => {
-    console.log(groupName)
+    console.log(groupName);
     const [students, setStudents] = useState([]);
     const [selectedStudents, setSelectedStudents] = useState([]);
     const [globalFilter, setGlobalFilter] = useState("");
@@ -20,11 +20,11 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
     }, [isOpen]);
 
     const filteredStudents = useMemo(() => {
-        return students.filter((student) =>
-            student.student.toLowerCase().includes(globalFilter.toLowerCase()) ||
-            student.student.toLowerCase().includes(globalFilter.toLowerCase()) ||
-            student.email.toLowerCase().includes(globalFilter.toLowerCase())
-        );
+        return students.filter((student) => {
+            const studentName = student.student ? student.student.toLowerCase() : '';
+            const studentEmail = student.email ? student.email.toLowerCase() : '';
+            return studentName.includes(globalFilter.toLowerCase()) || studentEmail.includes(globalFilter.toLowerCase());
+        });
     }, [students, globalFilter]);
 
     const handleStudentSelection = (student) => {
@@ -38,7 +38,7 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
     };
 
     const updateStudentDepartmentEmail = async (student) => {
-        console.log(groupName)
+        console.log(groupName);
         const updatedStudent = { ...student, group: groupName };
 
         try {
@@ -58,7 +58,6 @@ const StudentSelectionModal = ({ isOpen, onClose, onSelectStudents, groupName })
         onSelectStudents(selectedStudents.map(student => ({
             ...student,
             departmentEmail: groupName,
-
         })));
         onClose();
     };

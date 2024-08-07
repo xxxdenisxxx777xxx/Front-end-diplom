@@ -1,112 +1,216 @@
-import React, { useState } from 'react';
-import DropTeachers from '../components/schedules/DropTeachers';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 
 const SchedulePage2 = () => {
-    const initialSchedule = [
-        {
-            date: "Пн",
-            classes: [
-                { period: "1", week: "1", groups: ["Архітектура комп'ютерних систем, Ужеловський А.В. (з) (ауд. 8)", "", "", ""] },
-                { period: "2", week: "1", groups: ["Основи економіки та бізнесу, Ситник О.Ю. (з) (конференц-зала)", "", "", "Чисельні методи, Панік Л.О. (з) (ауд. 8)"] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        },
-        {
-            date: "Вт",
-            classes: [
-                { period: "1", week: "1", groups: ["", "Чисельні методи, Панік Л.О. (з) (ауд. 8)", "", ""] },
-                { period: "2", week: "1", groups: ["", "Проектування та моделювання програмних систем, Панік Л.О. (з) (ауд. 4)", "Архітектура комп'ютерних систем, Ужеловський А.В. (з) (ауд. 8)", ""] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        },
-        {
-            date: "Ср",
-            classes: [
-                { period: "1", week: "1", groups: ["Архітектура комп'ютерних систем, Ужеловський А.В. (з) (ауд. 8)", "", "", ""] },
-                { period: "2", week: "1", groups: ["Основи економіки та бізнесу, Ситник О.Ю. (з) (конференц-зала)", "", "", ""] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        },
-        {
-            date: "Чт",
-            classes: [
-                { period: "1", week: "1", groups: ["", "Чисельні методи, Панік Л.О. (з) (ауд. 8)", "", ""] },
-                { period: "2", week: "1", groups: ["", "Проектування та моделювання програмних систем, Панік Л.О. (з) (ауд. 4)", "", ""] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        }, {
-            date: "Пт",
-            classes: [
-                { period: "1", week: "1", groups: ["Архітектура комп'ютерних систем, Ужеловський А.В. (з) (ауд. 8)", "", "", ""] },
-                { period: "2", week: "1", groups: ["Основи економіки та бізнесу, Ситник О.Ю. (з) (конференц-зала)", "", "", ""] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        },
-        {
-            date: "Сб",
-            classes: [
-                { period: "1", week: "1", groups: ["", "Чисельні методи, Панік Л.О. (з) (ауд. 8)", "", ""] },
-                { period: "2", week: "1", groups: ["", "Проектування та моделювання програмних систем, Панік Л.О. (з) (ауд. 4)", "", ""] },
-                { period: "3", week: "1", groups: ["", "", "", ""] },
-                { period: "4", week: "1", groups: ["", "", "", ""] },
-            ],
-        },
-    ];
+    const [schedule, setSchedule] = useState([]); // Хранение расписания для всех учителей
+    const [teachers, setTeachers] = useState([]); // Состояние для хранения учителей
+    const [disciplines, setDisciplines] = useState([]); // Состояние для хранения дисциплин
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedCell, setSelectedCell] = useState(null);
+    const [selectedTeacher, setSelectedTeacher] = useState("");
+    const [selectedDiscipline, setSelectedDiscipline] = useState("");
+    const [selectedDate, setSelectedDate] = useState("");
+    const [selectedTime, setSelectedTime] = useState("");
 
-    const [editingCell, setEditingCell] = useState({ dayIndex: null, classIndex: null, groupIndex: null, value: "" });
-    const [schedule, setSchedule] = useState(initialSchedule);
-    const [selectedDay, setSelectedDay] = useState(null); // Состояние для хранения выбранного дня недели
-    const [confirmAddRow, setConfirmAddRow] = useState(false); // 
-    const [hoveredPeriod, setHoveredPeriod] = useState({ dayIndex: null, classIndex: null });
+    useEffect(() => {
+        const fetchTeachersAndSchedules = async () => {
+            try {
+                const response = await axios.get(
+                    "http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa7"
+                );
+                const teachers = response.data.items;
+                setTeachers(teachers);
 
-    const handleCellClick = (dayIndex, classIndex, groupIndex, value) => {
-        setEditingCell({ dayIndex, classIndex, groupIndex, value });
+                const schedulesPromises = teachers.map((teacher) =>
+                    axios.get(
+                        `http://77.221.152.210:5008/api/schedules/teacher-schedule`,
+                        {
+                            params: {
+                                fileName: "06.2024",
+                                teacherId: teacher.id,
+                            },
+                        }
+                    )
+                );
+
+                const schedulesResponses = await Promise.all(schedulesPromises);
+                const schedulesData = schedulesResponses.flatMap((res, index) =>
+                    res.data.map((lesson) => ({
+                        ...lesson,
+                        teacherName:
+                            teachers[index].firstName + " " + teachers[index].lastName,
+                    }))
+                );
+
+                schedulesData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                setSchedule(schedulesData);
+                console.log("Fetched schedules data:", schedulesData);
+            } catch (error) {
+                console.error("Ошибка получения учителей и расписания:", error);
+            }
+        };
+
+        fetchTeachersAndSchedules();
+    }, []);
+
+    const transformScheduleData = (data) => {
+        const transformedData = {};
+
+        data.forEach((item) => {
+            const date = new Date(item.date).toISOString().split("T")[0];
+            const time = new Date(item.date).toLocaleTimeString("uk-UA", {
+                hour: "2-digit",
+                minute: "2-digit",
+            });
+            const group = item.groupName;
+
+            if (!transformedData[date]) {
+                transformedData[date] = {};
+            }
+            if (!transformedData[date][time]) {
+                transformedData[date][time] = {};
+            }
+            if (!transformedData[date][time][group]) {
+                transformedData[date][time][group] = [];
+            }
+            transformedData[date][time][group].push({
+                teacher: item.teacher,
+                discipline: item.description,
+            });
+        });
+
+        const result = Object.keys(transformedData)
+            .map((date) => ({
+                date,
+                classes: Object.keys(transformedData[date])
+                    .map((time) => ({
+                        time,
+                        groups: transformedData[date][time],
+                    }))
+                    .sort((a, b) => a.time.localeCompare(b.time)), // сортируем по времени
+            }))
+            .sort((a, b) => new Date(a.date) - new Date(b.date)); // Сортировка дней по дате
+
+        return result;
     };
 
-    const handleModalChange = (e) => {
-        setEditingCell({ ...editingCell, value: e.target.value });
-    };
+    const combinedSchedule = transformScheduleData(schedule);
 
-    const handleModalSave = () => {
-        const newSchedule = [...schedule];
-        newSchedule[editingCell.dayIndex].classes[editingCell.classIndex].groups[editingCell.groupIndex] = editingCell.value;
-        setSchedule(newSchedule);
-        setEditingCell({ dayIndex: null, classIndex: null, groupIndex: null, value: "" });
+    const handleEmptyCellClick = async (date, time, groupName) => {
+        setSelectedCell({ date, time, groupName });
+        if (selectedTeacher) {
+            try {
+                const response = await axios.get(
+                    `http://77.221.152.210:5008/api/Disciplines/GetByUserId/${selectedTeacher}`
+                );
+                setDisciplines(response.data.items || []);
+                setModalOpen(true);
+            } catch (error) {
+                console.error("Ошибка получения дисциплин:", error);
+            }
+        } else {
+            setModalOpen(true);
+        }
     };
 
     const handleModalClose = () => {
-        setEditingCell({ dayIndex: null, classIndex: null, groupIndex: null, value: "" });
+        setModalOpen(false);
+        setSelectedCell(null);
+        setSelectedTeacher("");
+        setSelectedDiscipline("");
+        setSelectedDate("");
+        setSelectedTime("");
     };
 
-    const handleDayClick = (dayIndex) => {
-        setSelectedDay(dayIndex);
-        setConfirmAddRow(true); // Показать диалоговое окно для подтверждения добавления строки
+    const handleSubmit = async () => {
+        if (
+            (selectedCell || (selectedDate && selectedTime)) &&
+            selectedTeacher &&
+            selectedDiscipline
+        ) {
+            const date = selectedCell ? selectedCell.date : selectedDate;
+            const time = selectedCell ? selectedCell.time : selectedTime;
+            const groupName = selectedCell ? selectedCell.groupName : "";
+
+            const teacher = teachers.find((t) => t.id === selectedTeacher);
+            const discipline = disciplines.find((d) => d.id === selectedDiscipline);
+
+            const requestBody = {
+                teacherId: selectedTeacher,
+                date: new Date(`${date}T${time}:00.000Z`),
+                lesson: "lesson 6",
+                teacher: teacher ? teacher.firstName + " " + teacher.lastName : "",
+                description: discipline ? discipline.name : "",
+                groupName,
+                lessonId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                studentGroupId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                disciplineId: selectedDiscipline,
+            };
+
+            try {
+                await axios.post(
+                    "http://77.221.152.210:5008/api/Schedules/add-lesson?fileName=06.2024",
+                    requestBody
+                );
+                handleModalClose();
+                // Перезагрузка расписания
+                const response = await axios.get(
+                    "http://77.221.152.210:5008/api/Users/GetByDepartmentId/3fa85f64-5717-4562-b3fc-2c963f66afa7"
+                );
+                const teachers = response.data.items;
+                setTeachers(teachers);
+
+                const schedulesPromises = teachers.map((teacher) =>
+                    axios.get(
+                        `http://77.221.152.210:5008/api/schedules/teacher-schedule`,
+                        {
+                            params: {
+                                fileName: "06.2024",
+                                teacherId: teacher.id,
+                            },
+                        }
+                    )
+                );
+
+                const schedulesResponses = await Promise.all(schedulesPromises);
+                const schedulesData = schedulesResponses.flatMap((res, index) =>
+                    res.data.map((lesson) => ({
+                        ...lesson,
+                        teacherName:
+                            teachers[index].firstName + " " + teachers[index].lastName,
+                    }))
+                );
+
+                schedulesData.sort((a, b) => new Date(a.date) - new Date(b.date));
+                setSchedule(schedulesData);
+                console.log("Fetched schedules data:", schedulesData);
+            } catch (error) {
+                console.error("Ошибка отправки данных:", error);
+            }
+        }
     };
 
-    const handleAddRow = () => {
-        const newSchedule = [...schedule];
-        newSchedule[selectedDay].classes.push({ period: "5", week: "1", groups: ["", "", "", ""] });
-        setSchedule(newSchedule);
-        setConfirmAddRow(false); // Сбросить состояние подтверждения
+    const handleTeacherChange = async (e) => {
+        const teacherId = e.target.value;
+        setSelectedTeacher(teacherId);
+
+        if (teacherId) {
+            try {
+                const response = await axios.get(
+                    `http://77.221.152.210:5008/api/Disciplines/GetByUserId/${teacherId}`
+                );
+                setDisciplines(response.data.items || []);
+            } catch (error) {
+                console.error("Ошибка получения дисциплин:", error);
+            }
+        } else {
+            setDisciplines([]);
+        }
     };
 
-    const handlePeriodClick = (dayIndex, classIndex) => {
-        const newSchedule = [...schedule];
-        newSchedule[dayIndex].classes.splice(classIndex, 1);
-        setSchedule(newSchedule);
-    };
-
-    const handlePeriodMouseEnter = (dayIndex, classIndex) => {
-        setHoveredPeriod({ dayIndex, classIndex });
-    };
-
-    const handlePeriodMouseLeave = () => {
-        setHoveredPeriod({ dayIndex: null, classIndex: null });
+    const handleAddLessonClick = () => {
+        setSelectedCell(null);
+        setModalOpen(true);
     };
 
     return (
@@ -114,97 +218,159 @@ const SchedulePage2 = () => {
             <table className="min-w-full bg-white border-collapse">
                 <thead>
                     <tr>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">Дата</th>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">Пара</th>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">КН20-1</th>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">КН20-2</th>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">КН21-1</th>
-                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">КН21-2</th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            Дата
+                        </th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            Время
+                        </th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            КН20-1
+                        </th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            КН20-2
+                        </th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            КН21-1
+                        </th>
+                        <th className="py-2 px-4 border border-gray-200 bg-gray-50">
+                            КН21-2
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
-                    {schedule.map((day, dayIndex) => (
+                    {combinedSchedule.map((day, dayIndex) => (
                         <React.Fragment key={dayIndex}>
-                            {day.classes.map((item, classIndex) => (
-                                <tr key={classIndex}>
+                            {day.classes.map((timeSlot, classIndex) => (
+                                <tr key={`${dayIndex}-${classIndex}`}>
                                     {classIndex === 0 && (
-                                        <td onClick={() => handleDayClick(dayIndex)} rowSpan={day.classes.length} className="py-2 px-4 border border-gray-200 cursor-pointer">
+                                        <td
+                                            rowSpan={day.classes.length}
+                                            className="py-2 px-4 border border-gray-200"
+                                        >
                                             {day.date}
                                         </td>
                                     )}
-                                    <td
-                                        className="py-2 px-4 border border-gray-200 cursor-pointer"
-                                        onClick={() => handlePeriodClick(dayIndex, classIndex)}
-                                        onMouseEnter={() => handlePeriodMouseEnter(dayIndex, classIndex)}
-                                        onMouseLeave={handlePeriodMouseLeave}
-                                    >
-                                        {hoveredPeriod.dayIndex === dayIndex && hoveredPeriod.classIndex === classIndex ? '✖' : item.period}
+                                    <td className="py-2 px-4 border border-gray-200">
+                                        {timeSlot.time}
                                     </td>
-                                    {item.groups.map((group, groupIndex) => (
-                                        <td
-                                            key={groupIndex}
-                                            className="py-2 px-4 border border-gray-200 cursor-default"
-                                            onClick={() => handleCellClick(dayIndex, classIndex, groupIndex, group)}
-                                        >
-                                            {group}
-                                        </td>
-                                    ))}
+                                    {["КН20-1", "КН20-2", "КН21-1", "КН21-2"].map(
+                                        (groupName, colIndex) => (
+                                            <td
+                                                key={colIndex}
+                                                className="py-2 px-4 border border-gray-200"
+                                                onClick={() =>
+                                                    !timeSlot.groups[groupName] &&
+                                                    handleEmptyCellClick(
+                                                        day.date,
+                                                        timeSlot.time,
+                                                        groupName
+                                                    )
+                                                }
+                                            >
+                                                {timeSlot.groups[groupName] ? (
+                                                    timeSlot.groups[groupName].map(
+                                                        (lesson, lessonIndex) => (
+                                                            <div
+                                                                key={lessonIndex}
+                                                                className="p-2 mb-2 border border-gray-300 rounded"
+                                                            >
+                                                                <div>Учитель: {lesson.teacher}</div>
+                                                                <div>Дисциплина: {lesson.discipline}</div>
+                                                            </div>
+                                                        )
+                                                    )
+                                                ) : (
+                                                    <div className="p-2 mb-2 border border-gray-300 rounded">
+                                                        <div>Пусто</div>
+                                                    </div>
+                                                )}
+                                            </td>
+                                        )
+                                    )}
                                 </tr>
                             ))}
                         </React.Fragment>
                     ))}
                 </tbody>
-
             </table>
-
-            {/* Диалоговое окно для подтверждения добавления строки */}
-            {confirmAddRow && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-4 rounded shadow-lg">
-                        <h2 className="text-xl mb-4">Додати строку?</h2>
-                        <div className="mt-4 flex justify-end">
-                            <button
-                                className="px-4 py-2 bg-gray-200 rounded mr-2"
-                                onClick={() => setConfirmAddRow(false)}
+            <button
+                className="bg-green-500 text-white px-4 py-2 rounded mt-4"
+                onClick={handleAddLessonClick}
+            >
+                Додати дату
+            </button>
+            {modalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-4 rounded shadow-md">
+                        <h2 className="text-lg font-bold mb-4">
+                            {selectedCell ? "Добавить пару" : "Добавить урок"}
+                        </h2>
+                        <div className="mb-4">
+                            <label className="block mb-2">Учитель</label>
+                            <select
+                                className="w-full p-2 border border-gray-300 rounded"
+                                value={selectedTeacher}
+                                onChange={handleTeacherChange}
                             >
-                                Отмена
-                            </button>
-                            <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded"
-                                onClick={handleAddRow}
+                                <option value="">Выберите учителя</option>
+                                {teachers.map((teacher) => (
+                                    <option key={teacher.id} value={teacher.id}>
+                                        {teacher.firstName} {teacher.lastName}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        {!selectedCell && (
+                            <>
+                                <div className="mb-4">
+                                    <label className="block mb-2">Дата</label>
+                                    <input
+                                        type="date"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={selectedDate}
+                                        onChange={(e) => setSelectedDate(e.target.value)}
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="block mb-2">Время</label>
+                                    <input
+                                        type="time"
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                        value={selectedTime}
+                                        onChange={(e) => setSelectedTime(e.target.value)}
+                                    />
+                                </div>
+                            </>
+                        )}
+                        <div className="mb-4">
+                            <label className="block mb-2">Дисциплина</label>
+                            <select
+                                className="w-full p-2 border border-gray-300 rounded"
+                                value={selectedDiscipline}
+                                onChange={(e) => setSelectedDiscipline(e.target.value)}
                             >
-                                Добавить
-                            </button>
+                                <option value="">Выберите дисциплину</option>
+                                {Array.isArray(disciplines) &&
+                                    disciplines.map((discipline) => (
+                                        <option key={discipline.id} value={discipline.id}>
+                                            {discipline.name}
+                                        </option>
+                                    ))}
+                            </select>
                         </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Модальное окно для редактирования */}
-            {editingCell.dayIndex !== null && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    <div className="bg-white p-4 w-96 rounded shadow-lg">
-                        <h2 className="text-xl mb-4">Додання / Зміна розкладу</h2>
-                        <div className='pb-5'>
-                            <DropTeachers />
-                        </div>
-                        <textarea
-                            className="w-full h-32 p-2 border border-gray-300"
-                            value={editingCell.value}
-                            onChange={handleModalChange}
-                        />
-                        <div className="mt-4 flex justify-end">
+                        <div className="flex justify-end">
                             <button
-                                className="px-4 py-2 bg-gray-200 rounded mr-2"
+                                className="bg-red-500 text-white px-4 py-2 rounded mr-2"
                                 onClick={handleModalClose}
                             >
                                 Отмена
                             </button>
                             <button
-                                className="px-4 py-2 bg-blue-500 text-white rounded"
-                                onClick={handleModalSave}
+                                className="bg-blue-500 text-white px-4 py-2 rounded"
+                                onClick={handleSubmit}
                             >
-                                Сохранить
+                                Добавить
                             </button>
                         </div>
                     </div>
@@ -215,3 +381,4 @@ const SchedulePage2 = () => {
 };
 
 export default SchedulePage2;
+

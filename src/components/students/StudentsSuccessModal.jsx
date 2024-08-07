@@ -56,6 +56,7 @@ function StudentsSuccessModal({ isOpen, onClose, studentId, onDataChange }) {
     const getSubjectName = (lessonId) => {
         const subject = subjects.find(sub => sub.id === lessonId);
         return subject ? subject.subjectName : 'Неизвестный предмет';
+
     };
 
     const handleGradeClick = (grade) => {

@@ -13,6 +13,8 @@ const sendMessage = async (chatMessageDto) => {
     }
 };
 
+
+
 const getAllUsers = async () => {
     try {
         const response = await axios.get(`${baseUrl}/Users`);
@@ -113,9 +115,10 @@ export default function ChatPage() {
 
     const searchUsers = () => {
         if (searchTerm.trim()) {
-            const results = allUsers.filter((user) =>
-                user.firstName.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+            const results = allUsers.filter((user) => {
+                const name = user.firstName || user.student?.firstName || "";
+                return name.toLowerCase().includes(searchTerm.toLowerCase());
+            });
             setSearchResults(results);
         } else {
             setSearchResults([]);
@@ -263,28 +266,17 @@ export default function ChatPage() {
                         <div className="flex flex-col flex-auto flex-shrink-0 rounded-2xl bg-gray-100 h-full p-4">
                             <div className="flex flex-col h-full overflow-x-auto mb-4">
                                 <div className="flex flex-col h-full">
-                                    <div className="grid grid-cols-12 gap-y-2">
+                                    <div className="flex flex-col gap-y-2">
                                         {messages.map((message, index) => (
                                             <div
                                                 key={index}
-                                                className={`col-start-${message.isSelf ? 6 : 1
-                                                    } col-end-${message.isSelf ? 13 : 8} p-3 rounded-lg`}
+                                                className={`flex ${message.isSelf ? 'justify-end' : 'justify-start'} mb-4`}
                                             >
-                                                <div
-                                                    className={`flex ${message.isSelf
-                                                            ? "items-center justify-start flex-row-reverse"
-                                                            : "items-center"
-                                                        }`}
-                                                >
+                                                <div className={`flex items-center ${message.isSelf ? 'flex-row-reverse' : ''}`}>
                                                     <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-500 flex-shrink-0">
                                                         {message.isSelf ? "А" : "В"}
                                                     </div>
-                                                    <div
-                                                        className={`relative ${message.isSelf
-                                                                ? "mr-3 bg-indigo-100"
-                                                                : "ml-3 bg-white"
-                                                            } text-sm py-2 px-4 shadow rounded-xl`}
-                                                    >
+                                                    <div className={`relative ${message.isSelf ? 'mr-3 bg-indigo-100' : 'ml-3 bg-white'} text-sm py-2 px-4 shadow rounded-xl`}>
                                                         <div>{message.message}</div>
                                                     </div>
                                                 </div>
@@ -373,4 +365,3 @@ export default function ChatPage() {
         </>
     );
 }
-

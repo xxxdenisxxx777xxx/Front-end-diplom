@@ -28,14 +28,22 @@ function InfoTeachersModal({ isOpen, onClose, teacherData }) {
 
     const handleDownloadExcel = async () => {
         try {
+            // Fetch the schedule data
             const response = await axios.get('http://77.221.152.210:5008/api/Schedules');
-            const decodedData = atob(response.data.items[0].file);
+            const allSchedules = response.data.items;
 
-            const workbook = XLSX.read(decodedData, { type: 'binary' });
+            // Filter the schedule data to include only entries for the specific teacher
+            const filteredSchedules = allSchedules.filter(schedule => schedule.teacherId === data.id);
+
+            // Convert the filtered data to an Excel sheet
+            const worksheet = XLSX.utils.json_to_sheet(filteredSchedules);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Schedule');
+
+            // Create a blob from the workbook and download it
             const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-
             const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            saveAs(blob, 'schedule.xlsx');
+            saveAs(blob, `${data.firstName}_${data.lastName}_schedule.xlsx`);
         } catch (error) {
             console.error('Ошибка при загрузке файла:', error);
         }
@@ -77,13 +85,13 @@ function InfoTeachersModal({ isOpen, onClose, teacherData }) {
                         >
                             Видалити вчителя
                         </button>
-                        <button
+                        {/* <button
                             className="bg-sky-500 text-white active:bg-sky-800 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                             type="button"
                             onClick={handleDownloadExcel}
                         >
                             Розклад .excel
-                        </button>
+                        </button> */}
                         <button
                             className="bg-yellow-500 text-white active:bg-yellow-800 font-bold uppercase text-sm px-6 py-3 rounded shadow hover:shadow-lg outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                             type="button"

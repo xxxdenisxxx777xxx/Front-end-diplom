@@ -82,14 +82,14 @@ function VisitingStudentModal({ attendanceData, studentsId, isOpen, onClose, sel
                                 <div key={attendance.id} className="flex items-center justify-between p-4 border-b border-gray-200">
                                     <div>
                                         <p>{getLessonName(attendance.lessonId)}</p>
-                                        <p>Присутствие на паре: {attendance.isPresent ? 'Да' : 'Нет'}</p>
+                                        <p>Наявність на парі: {attendance.isPresent ? 'Да' : 'Нет'}</p>
                                         <p>Дата: {getRandomDate()}</p>
                                     </div>
                                     <button
                                         className={`px-4 py-2 rounded-md text-white ${attendance.isPresent ? 'bg-red-500' : 'bg-green-500'}`}
                                         onClick={() => handleTogglePresence(attendance)}
                                     >
-                                        {attendance.isPresent ? 'Отметить как отсутствующего' : 'Отметить как присутствующего'}
+                                        {attendance.isPresent ? 'Відмітить відсутність' : 'Відмітить присутність'}
                                     </button>
                                 </div>
                             ))}
